@@ -1,0 +1,25 @@
+{
+  "name": "@reviews/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "DATABASE_URL=${DATABASE_URL:-postgres://reviews:reviews@127.0.0.1:5432/reviews} bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/mcp": "^0.3.2",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@reviews/contracts": "workspace:*",
+    "better-auth": "^1.7.13",
+    "better-call": "1.4.4",
+    "drizzle-orm": "^0.44.7",
+    "hono": "^4.10.7",
+    "postgres": "^3.4.7"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.10",
+    "drizzle-kit": "^0.31.6",
+    "typescript": "^6.0.3"
+  }
+}
