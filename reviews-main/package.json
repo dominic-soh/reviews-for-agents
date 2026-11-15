@@ -11,6 +11,8 @@
     "check": "biome check .",
     "format": "biome format --write .",
     "test": "bun run --filter @reviews/app test && bun run --filter @reviews/api test",
+    "install:api": "bun install --frozen-lockfile --filter @reviews/api --omit=peer",
+    "test:api": "bun run --filter @reviews/api test",
     "typecheck": "bun run --filter '*' typecheck",
     "ci": "bun scripts/ci.ts",
     "prepare": "husky"
