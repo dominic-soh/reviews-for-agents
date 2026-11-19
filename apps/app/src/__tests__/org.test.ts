@@ -1,5 +1,5 @@
 import { memberSchema } from '@reviews/contracts';
-import { expect, test } from '@rstest/core';
+import { expect, test } from 'vitest';
 import {
   eligibleManagers,
   parseInviteDraft,

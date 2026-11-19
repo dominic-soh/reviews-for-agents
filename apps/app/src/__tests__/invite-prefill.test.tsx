@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render } from '@lynx-js/react/testing-library';
-import { expect, test } from '@rstest/core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { expect, test } from 'vitest';
 
 import { App } from '../App';
 
@@ -70,7 +70,7 @@ test('an invited email in the page query prefills the sign-in field', async () =
     expect(await findByText('Welcome to Reviews')).toBeInTheDocument();
 
     const sendLink = await findByText('Send sign-in link');
-    fireEvent.tap(sendLink);
+    fireEvent.tap(sendLink as Element);
 
     await findByText('Check your email');
 

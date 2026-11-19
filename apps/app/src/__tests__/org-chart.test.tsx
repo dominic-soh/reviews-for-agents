@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { render } from '@lynx-js/react/testing-library';
 import { memberSchema } from '@reviews/contracts';
-import { expect, test } from '@rstest/core';
+import { expect, test } from 'vitest';
 import { CompanyHome } from '../contexts/identity/screens/CompanyHome';
 import { MemberScreen } from '../contexts/identity/screens/MemberScreen';
 import { MyPlace } from '../contexts/identity/screens/MyPlace';

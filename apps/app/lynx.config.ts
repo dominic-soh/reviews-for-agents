@@ -2,7 +2,8 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { pluginQRCode } from '@lynx-js/qrcode-rsbuild-plugin';
 import { pluginReactLynx } from '@lynx-js/react-rsbuild-plugin';
-import { defineConfig } from '@rsbuild/core';
+import { defineConfig } from '@lynx-js/rspeedy';
+import type { RsbuildPlugin } from '@rsbuild/core';
 import { pluginBabel } from '@rsbuild/plugin-babel';
 import { pluginTypeCheck } from '@rsbuild/plugin-type-check';
 import { pluginTailwindCSS } from 'rsbuild-plugin-tailwindcss';
@@ -31,6 +32,43 @@ function withSignInScript(body: string): string {
   return body.replace('<head>', `<head><script>${signInPropsScript}</script>`);
 }
 
+// Rspeedy disables the HTML plugin. The web preview document is served by its
+// dev middleware, so the sign-in query params have to be written there.
+function signInPreviewPlugin(): RsbuildPlugin {
+  return {
+    name: 'reviews:sign-in-preview',
+    setup(api) {
+      api.onBeforeStartDevServer(({ server }) => {
+        server.middlewares.use((req, res, next) => {
+          if (!isPreviewDocument(req.url)) {
+            next();
+            return;
+          }
+          const chunks: Buffer[] = [];
+          const end = res.end.bind(res);
+          res.write = ((chunk: unknown) => {
+            if (typeof chunk === 'string' || Buffer.isBuffer(chunk)) {
+              chunks.push(Buffer.from(chunk));
+            }
+            return true;
+          }) as typeof res.write;
+          res.end = ((chunk?: unknown) => {
+            if (typeof chunk === 'string' || Buffer.isBuffer(chunk)) {
+              chunks.push(Buffer.from(chunk));
+            }
+            const body = withSignInScript(
+              Buffer.concat(chunks).toString('utf8'),
+            );
+            res.setHeader('content-length', Buffer.byteLength(body));
+            return end(body);
+          }) as typeof res.end;
+          next();
+        });
+      });
+    },
+  };
+}
+
 const babel = pluginBabel({
   include: /\.(?:jsx|tsx)$/,
   babelLoaderOptions(opts) {
@@ -46,34 +84,6 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    setup({ action, server }) {
-      if (action !== 'dev') {
-        return;
-      }
-      server.middlewares.use((req, res, next) => {
-        if (!isPreviewDocument(req.url)) {
-          next();
-          return;
-        }
-        const chunks: Buffer[] = [];
-        const end = res.end.bind(res);
-        res.write = ((chunk: unknown) => {
-          if (typeof chunk === 'string' || Buffer.isBuffer(chunk)) {
-            chunks.push(Buffer.from(chunk));
-          }
-          return true;
-        }) as typeof res.write;
-        res.end = ((chunk?: unknown) => {
-          if (typeof chunk === 'string' || Buffer.isBuffer(chunk)) {
-            chunks.push(Buffer.from(chunk));
-          }
-          const body = withSignInScript(Buffer.concat(chunks).toString('utf8'));
-          res.setHeader('content-length', Buffer.byteLength(body));
-          return end(body);
-        }) as typeof res.end;
-        next();
-      });
-    },
   },
   resolve: {
     alias: {
@@ -86,18 +96,6 @@ export default defineConfig({
       ),
       'background-only': backgroundOnly,
     },
-  },
-  html: {
-    tags: [
-      {
-        tag: 'script',
-        head: true,
-        append: false,
-        // The web preview loads the bundle by casename and drops every other
-        // query param. Lynx reads this global props object on startup.
-        children: signInPropsScript,
-      },
-    ],
   },
   source: {
     entry: {
@@ -116,11 +114,10 @@ export default defineConfig({
         return `${url}?fullscreen=true`;
       },
     }),
-    pluginReactLynx({
-      // The published encoder rejects anything above 3.9. Raise this when a
-      // compiler that can emit 4.1 is published. Host apps must stay at or
-      // above this value.
-      engineVersion: '3.9',
+    ...pluginReactLynx({
+      // This compiler's encoder accepts Lynx 1.0 through 3.5. The Rsbuild 2
+      // compiler accepted 3.9. Host apps must stay at or above this value.
+      engineVersion: '3.5',
       enableCSSInheritance: true,
     }),
     pluginTailwindCSS({
@@ -128,5 +125,6 @@ export default defineConfig({
       exclude: [/node_modules/],
     }),
     pluginTypeCheck(),
+    signInPreviewPlugin(),
   ],
 });

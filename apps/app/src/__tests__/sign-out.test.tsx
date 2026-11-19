@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, waitFor } from '@lynx-js/react/testing-library';
-import { expect, test } from '@rstest/core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { expect, test } from 'vitest';
 
 import { App } from '../App';
 import { forgetSession } from '../contexts/identity/api/session-carry';
@@ -102,7 +102,7 @@ test('pressing sign out calls the endpoint, drops the token, and shows sign-in',
     );
 
     const signOutButton = await findByText('Sign out');
-    fireEvent.tap(signOutButton);
+    fireEvent.tap(signOutButton as Element);
 
     expect(await findByText('Welcome to Reviews')).toBeInTheDocument();
 

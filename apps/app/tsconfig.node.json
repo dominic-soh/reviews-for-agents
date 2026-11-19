@@ -7,11 +7,10 @@
     "moduleResolution": "node16",
     "erasableSyntaxOnly": true,
 
-    // Match Rsbuild v2 runtime requirements.
     "lib": ["es2023"],
     "target": "es2022",
 
     "noEmit": true
   },
-  "include": ["./rsbuild.config.ts", "./rstest.config.ts"]
+  "include": ["./lynx.config.ts", "./vitest.config.ts"]
 }

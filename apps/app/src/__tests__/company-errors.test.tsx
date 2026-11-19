@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, waitFor } from '@lynx-js/react/testing-library';
 import { memberSchema } from '@reviews/contracts';
-import { expect, test } from '@rstest/core';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { expect, test } from 'vitest';
 
 import { App } from '../App';
 import { forgetSession } from '../contexts/identity/api/session-carry';
@@ -112,7 +112,7 @@ test('a 500 from members shows an error and retry restores the list', async () =
     const retryButton = await findByText('Try again');
     expect(await findByText('Could not load your team.')).toBeInTheDocument();
 
-    fireEvent.tap(retryButton);
+    fireEvent.tap(retryButton as Element);
 
     expect(await findByText('Ada')).toBeInTheDocument();
     expect(memberCalls).toBe(2);

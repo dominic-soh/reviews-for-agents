@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { render } from '@lynx-js/react/testing-library';
-import { expect, test } from '@rstest/core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { expect, test } from 'vitest';
 
 import { App } from '../App';
 import { SignIn } from '../contexts/identity/screens/SignIn';

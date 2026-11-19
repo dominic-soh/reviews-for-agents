@@ -1,6 +1,39 @@
+import { fireEvent } from '@lynx-js/react/testing-library';
+
 // lynx-ui Input calls setValue on mount, and KeyboardAwareRoot calls
 // setNativeProps. The test renderer throws from those NodesRef calls, which
 // fails the file even when the assertion passed.
+
+// @lynx-js/react 0.116 fires tap on the node you pass, and that event does not
+// bubble. Passing `bubbles` throws: this version copies the init onto the
+// Event, whose `bubbles` is read-only. The handler is on the parent view.
+type TapTarget = Parameters<typeof fireEvent.tap>[0];
+
+type EventHost = {
+  eventMap?: Record<string, unknown>;
+  parentElement?: EventHost | null;
+};
+
+function isEventHost(node: TapTarget): node is TapTarget & EventHost {
+  return typeof node === 'object' && node !== null && 'parentElement' in node;
+}
+
+function tapTarget(node: TapTarget): TapTarget {
+  if (!isEventHost(node)) {
+    return node;
+  }
+  let current: EventHost | null = node;
+  while (current) {
+    if (current.eventMap?.['bindEvent:tap']) {
+      return current as TapTarget;
+    }
+    current = current.parentElement ?? null;
+  }
+  return node;
+}
+
+const tap = fireEvent.tap.bind(fireEvent);
+fireEvent.tap = (node, init) => tap(tapTarget(node), init);
 type InvokeCall = {
   success?: (result: unknown) => void;
 };
